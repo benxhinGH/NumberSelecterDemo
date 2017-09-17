@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 
 /**
@@ -24,9 +25,13 @@ public class NumberSelecter extends View {
     private float endX;
     private float endY;
 
+    //默认文字所在圆的半径,单位dp
+    private int defaultTextPathRadius=50;
+    //默认圆环宽度，单位dp
+    private int defaultRingWidth=35;
+    //默认文字大小,单位sp
+    private int defaultTextSize=20;
 
-    private float bigCircleRadius=200;
-    private float smallCircleRadius=100;
 
     private int currentSelectedNumber;
 
@@ -61,29 +66,24 @@ public class NumberSelecter extends View {
 
     private void drawRing(Canvas canvas){
         //圆矩形轮廓
-        RectF rectF=new RectF(startX-bigCircleRadius+50,startY-bigCircleRadius+50,startX+bigCircleRadius-50,
-                startY+bigCircleRadius-50);
-
-
+        int textPathRadius=dp2px(defaultTextPathRadius);
+        RectF rectF=new RectF(startX-textPathRadius,startY-textPathRadius,
+                startX+textPathRadius, startY+textPathRadius);
         Paint paint=new Paint();
         paint.setAntiAlias(true);
         paint.setColor(getResources().getColor(R.color.colorAccent));
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(80);
+        paint.setStrokeWidth(dp2px(defaultRingWidth));
         paint.setAlpha(100);
         canvas.drawArc(rectF,0,360,false,paint);
-
-
 
         //绘制选中部分扇形
         if(!fingerInSmallCircle()){
             paint.setAlpha(200);
-            canvas.drawArc(rectF,-getSelectedArcAngle(),40,false,paint);
+            canvas.drawArc(rectF,-getSelectedArcAngle(),36,false,paint);
         }else{
             currentSelectedNumber=0;
         }
-
-
 
     }
 
@@ -100,15 +100,16 @@ public class NumberSelecter extends View {
         Paint paint=new Paint();
         paint.setColor(Color.WHITE);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setTextSize(45);
+        paint.setTextSize(sp2px(defaultTextSize));
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setAntiAlias(true);
         float tempX,tempY;
         int currentNumber=4;
+        int textPathRadius=dp2px(defaultTextPathRadius);
         for(int i=0;i<9;++i,currentNumber++){
             if(currentNumber==10)currentNumber=1;
-            tempX=(float)(startX+150*Math.cos(Math.toRadians(40*i+18)));
-            tempY=(float)(startY+150*Math.sin(Math.toRadians(40*i+18)));
+            tempX=(float)(startX+textPathRadius*Math.cos(Math.toRadians(40*i+18)));
+            tempY=(float)(startY+textPathRadius*Math.sin(Math.toRadians(40*i+18)));
             tempY+=10;
             canvas.drawText(String.valueOf(currentNumber),tempX,tempY,paint);
         }
@@ -193,6 +194,21 @@ public class NumberSelecter extends View {
 
     public interface OnNumberSelectedListener{
         void onSelected(int number);
+    }
+
+    private int dp2px(int dp){
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        );
+    }
+
+    private int sp2px(int sp){
+        return (int)TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                sp,
+                getResources().getDisplayMetrics());
     }
 
 }
